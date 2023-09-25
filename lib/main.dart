@@ -132,12 +132,12 @@ class BottomBar extends StatelessWidget {
           // runAlignment: WrapAlignment.center,
           children: [
             Image.network(
-              "https://daddy.su/vania.jpg",
+              "https://dump.mlntcandy.com/mlntcandy_head_nt.png",
               filterQuality: FilterQuality.none,
               width: 46,
               height: 46,
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 9),
             Expanded(
               child: Wrap(
                 direction: Axis.vertical,
