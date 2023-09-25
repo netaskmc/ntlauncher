@@ -22,9 +22,10 @@ class AuthDisplay {
   }
 }
 
+// ignore: non_constant_identifier_names
 final EXAMPLE_AUTH_DISPLAY = AuthDisplay(
-    // descriptor: AuthDisplayDescriptor(
-    // type: AuthType.netask,
-    // nickname: "Mlntcandy",
-    // ),
-    );
+  descriptor: AuthDisplayDescriptor(
+    type: AuthType.netask,
+    nickname: "Mlntcandy",
+  ),
+);

@@ -3,7 +3,7 @@ import 'package:feather_icons/feather_icons.dart';
 import 'package:ntlauncher/auth/descriptor.dart';
 import 'package:ntlauncher/ui/accent_button.dart';
 import 'package:ntlauncher/ui/panel.dart';
-import 'package:ntlauncher/ui/tab.dart';
+import 'package:ntlauncher/ui/tabs.dart';
 import 'package:window_manager/window_manager.dart';
 
 void main() async {
@@ -17,7 +17,7 @@ void main() async {
       // backgroundColor: Colors.transparent,
       skipTaskbar: false,
       // titleBarStyle: TitleBarStyle.hidden,
-      minimumSize: Size(400, 300));
+      minimumSize: Size(400, 500));
   windowManager.waitUntilReadyToShow(windowOptions, () async {
     await windowManager.show();
     await windowManager.focus();
@@ -52,7 +52,17 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage>
+    with SingleTickerProviderStateMixin {
+  List<String> tabs = ["modpacks", "vanilla", "news"];
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(vsync: this, length: tabs.length);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,22 +73,40 @@ class _MyHomePageState extends State<MyHomePage> {
             NtPanel(
               height: 50,
               width: double.infinity,
-              child: Flex(
-                direction: Axis.horizontal,
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  NtTab(name: "Modpacks"),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                child: NtTabs(
+                  names: tabs,
+                  displayNames: ["Modpacks", "Vanilla", "News"],
+                  controller: _tabController,
+                ),
               ),
             ),
             Expanded(
-              child: Container(
-                  child: Padding(
-                padding: const EdgeInsets.all(32.0),
-                // child: ,
-              )),
+              child: TabBarView(
+                controller: _tabController,
+                children: tabs.map((tab) {
+                  final String label = tab.toLowerCase();
+                  return Container(
+                    child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: NtPanel(
+                          radius: 20,
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: switch (label) {
+                              "modpacks" => const Text("Modpacks"),
+                              "vanilla" => const Text("Vanilla"),
+                              "news" => const Text("News"),
+                              _ => const Text("Unknown"),
+                            },
+                          ),
+                        )),
+                  );
+                }).toList(),
+              ),
             ),
+            //   child:
             BottomBar(auth: EXAMPLE_AUTH_DISPLAY),
           ],
         ),
