@@ -1,43 +1,23 @@
 import 'package:flutter/material.dart';
 
-class NtTab extends StatefulWidget {
-  NtTab({
+class NtTab extends StatelessWidget {
+  const NtTab({
     super.key,
     required this.name,
   });
-  String name;
 
-  @override
-  State<NtTab> createState() => _NtTabState();
-}
-
-class _NtTabState extends State<NtTab> {
-  bool _isHovered = false;
-  bool isSelected = true;
+  final String name;
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (event) {
-        setState(() {
-          _isHovered = true;
-        });
-      },
-      onExit: (event) {
-        setState(() {
-          _isHovered = false;
-        });
-      },
-      cursor: SystemMouseCursors.click,
-      child: Tab(
-        // padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Text(
-          widget.name.toUpperCase(),
-          style: TextStyle(
-            letterSpacing: 2,
-            // color: Color.fromRGBO(255, 44, 192, 1),
-            fontWeight: FontWeight.w500,
-          ),
+    return Tab(
+      // padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Text(
+        name.toUpperCase(),
+        style: const TextStyle(
+          letterSpacing: 2,
+          // color: Color.fromRGBO(255, 44, 192, 1),
+          fontWeight: FontWeight.w500,
         ),
       ),
     );
@@ -45,16 +25,16 @@ class _NtTabState extends State<NtTab> {
 }
 
 class NtTabs extends StatelessWidget {
-  NtTabs({
+  const NtTabs({
     super.key,
     required this.names,
     this.controller,
     this.displayNames,
   });
 
-  List<String> names;
-  List<String>? displayNames;
-  TabController? controller;
+  final List<String> names;
+  final List<String>? displayNames;
+  final TabController? controller;
 
   @override
   Widget build(BuildContext context) {
@@ -63,8 +43,8 @@ class NtTabs extends StatelessWidget {
       // mainAxisAlignment: MainAxisAlignment.center,
       // crossAxisAlignment: CrossAxisAlignment.center,
       controller: controller,
-      indicatorColor: const Color.fromRGBO(255, 44, 192, 1),
-      labelColor: const Color.fromRGBO(255, 44, 192, 1),
+      indicatorColor: const Color.fromARGB(255, 255, 88, 205),
+      labelColor: const Color.fromARGB(255, 255, 88, 205),
       unselectedLabelColor: const Color.fromRGBO(255, 255, 255, 0.5),
       splashFactory: NoSplash.splashFactory,
       overlayColor: const MaterialStatePropertyAll(Colors.transparent),
@@ -73,14 +53,14 @@ class NtTabs extends StatelessWidget {
       tabAlignment: TabAlignment.start,
 
       indicator: UnderlineTabIndicator(
-        borderSide: BorderSide(
+        borderSide: const BorderSide(
           width: 2,
-          color: const Color.fromRGBO(255, 44, 192, 1),
+          color: Color.fromRGBO(255, 44, 192, 1),
         ),
         borderRadius: BorderRadius.circular(10),
       ),
 
-      indicatorPadding: EdgeInsets.fromLTRB(0, 0, 0, 7.5),
+      indicatorPadding: const EdgeInsets.fromLTRB(0, 0, 0, 7.5),
 
       tabs: [
         for (var name in displayNames ?? names)

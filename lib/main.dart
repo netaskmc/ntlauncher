@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:ntlauncher/auth/descriptor.dart';
+import 'package:ntlauncher/logger.dart';
+import 'package:ntlauncher/modpacks/manager.dart';
+import 'package:ntlauncher/tabs/log.dart';
+import 'package:ntlauncher/tabs/modpacks.dart';
 import 'package:ntlauncher/ui/accent_button.dart';
 import 'package:ntlauncher/ui/panel.dart';
 import 'package:ntlauncher/ui/tabs.dart';
+import 'package:ntlauncher/popups/settings.dart';
+import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
 void main() async {
@@ -22,7 +28,7 @@ void main() async {
     await windowManager.show();
     await windowManager.focus();
   });
-
+  Log.info.log("Initialized window manager.");
   runApp(const MyApp());
 }
 
@@ -31,14 +37,25 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'NeTask Launcher',
-      theme: ThemeData(
-        colorScheme: const ColorScheme.dark(),
-        fontFamily: 'Inter',
-        useMaterial3: true,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (ctx) => ModpackManager()),
+        ChangeNotifierProvider(create: (ctx) => LogProvider()),
+      ],
+      child: MaterialApp(
+        title: 'NeTask Launcher',
+        theme: ThemeData(
+          colorScheme: const ColorScheme.dark(),
+          fontFamily: 'Inter',
+          useMaterial3: true,
+          textSelectionTheme: const TextSelectionThemeData(
+            cursorColor: Color.fromRGBO(255, 255, 255, 0.5),
+            selectionColor: Color.fromRGBO(255, 255, 255, 0.3),
+            selectionHandleColor: Color.fromRGBO(255, 255, 255, 0.5),
+          ),
+        ),
+        home: const MyHomePage(title: 'NeTask Launcher'),
       ),
-      home: const MyHomePage(title: 'NeTask Launcher'),
     );
   }
 }
@@ -54,7 +71,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
-  List<String> tabs = ["modpacks", "vanilla", "news"];
+  final List<String> tabs = ["modpacks", "vanilla", "logs"];
   late TabController _tabController;
 
   @override
@@ -66,7 +83,13 @@ class _MyHomePageState extends State<MyHomePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
+      body: Container(
+        // decoration: BoxDecoration(
+        //   image: DecorationImage(
+        //     image: const AssetImage("assets/images/test_bg.jpg"),
+        //     fit: BoxFit.cover,
+        //   ),
+        // ),
         child: Column(
           // mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
@@ -77,7 +100,7 @@ class _MyHomePageState extends State<MyHomePage>
                 padding: const EdgeInsets.symmetric(horizontal: 10.0),
                 child: NtTabs(
                   names: tabs,
-                  displayNames: ["Modpacks", "Vanilla", "News"],
+                  displayNames: ["Modpacks", "Vanilla", "Logs"],
                   controller: _tabController,
                 ),
               ),
@@ -87,22 +110,20 @@ class _MyHomePageState extends State<MyHomePage>
                 controller: _tabController,
                 children: tabs.map((tab) {
                   final String label = tab.toLowerCase();
-                  return Container(
-                    child: Padding(
-                        padding: const EdgeInsets.all(24.0),
-                        child: NtPanel(
-                          radius: 20,
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: switch (label) {
-                              "modpacks" => const Text("Modpacks"),
-                              "vanilla" => const Text("Vanilla"),
-                              "news" => const Text("News"),
-                              _ => const Text("Unknown"),
-                            },
-                          ),
-                        )),
-                  );
+                  return Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: NtPanel(
+                        radius: 20,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: switch (label) {
+                            "modpacks" => const ModpacksTab(),
+                            "vanilla" => const Text("Vanilla"),
+                            "logs" => const LogTab(),
+                            _ => const Text("Unknown"),
+                          },
+                        ),
+                      ));
                 }).toList(),
               ),
             ),
@@ -197,9 +218,14 @@ class BottomBar extends StatelessWidget {
                 // onPressed: _incrementCounter,
               )),
               const SizedBox(width: 10),
-              const AccentButton(
+              AccentButton(
                 width: 70,
-                child: Padding(
+                onPressed: () => showDialog<String>(
+                  context: context,
+                  builder: (BuildContext context) =>
+                      const GeneralSettingsDialog(),
+                ),
+                child: const Padding(
                   padding: EdgeInsets.fromLTRB(0, 0, 0, 2),
                   child: Icon(
                     FeatherIcons.settings,
