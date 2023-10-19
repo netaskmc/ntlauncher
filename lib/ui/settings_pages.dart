@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:ntlauncher/logger.dart';
 import 'package:ntlauncher/providers/settings.dart';
 import 'package:ntlauncher/ui/dialog.dart';
 import 'package:ntlauncher/ui/switch.dart';

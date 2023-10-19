@@ -31,8 +31,8 @@ dependencies:
   flutter:
     sdk: flutter
 
-  launcher_core:
-    path: ./launcher_core
+  # launcher_core:
+  #   path: ./launcher_core
 
   feather_icons: ^1.2.0
   smooth_corner: ^1.1.0
