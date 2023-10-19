@@ -1,34 +1,28 @@
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/material.dart';
-import 'package:ntlauncher/ui/button.dart';
-import 'package:ntlauncher/ui/dialog.dart';
-import 'package:ntlauncher/ui/switch.dart';
-import 'package:ntlauncher/ui/text_field.dart';
+import 'package:ntlauncher/ui/settings_pages.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
-class SettingsPage {
-  String title;
-  IconData icon;
-  Widget page;
-  SettingsPage({required this.title, required this.icon, required this.page});
+class VersionText extends StatelessWidget {
+  const VersionText({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<PackageInfo>(
+      future: PackageInfo.fromPlatform(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return Text(
+              "Version ${snapshot.data!.version}, build ${snapshot.data!.buildNumber}");
+        } else {
+          return Text("Version ...");
+        }
+      },
+    );
+  }
 }
-
-var pages = [
-  SettingsPage(
-    title: 'General',
-    icon: FeatherIcons.settings,
-    page: Container(),
-  ),
-  SettingsPage(
-    title: 'Appearance',
-    icon: FeatherIcons.eye,
-    page: Container(),
-  ),
-  SettingsPage(
-    title: 'About',
-    icon: FeatherIcons.info,
-    page: Container(),
-  ),
-];
 
 class GeneralSettingsDialog extends StatelessWidget {
   const GeneralSettingsDialog({
@@ -37,34 +31,56 @@ class GeneralSettingsDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NtDialog(
-      content: SizedBox(
-        width: double.infinity,
-        height: double.infinity,
-        child: Row(
-          children: [
-            NavigationRail(
-              // backgroundColor: Colors.transparent,
-              extended: true,
-              minExtendedWidth: 200,
-              useIndicator: false,
-
-              onDestinationSelected: (value) => {},
-              destinations: pages
-                  .map((e) => NavigationRailDestination(
-                        icon: Icon(e.icon),
-                        label: Text(e.title),
-                      ))
-                  .toList(),
-              selectedIndex: 0,
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10),
-              child: Container(width: 1, color: Colors.grey[900]),
-            ),
-          ],
-        ),
+    return SettingsPagesDialog(pages: [
+      SettingsPage(
+        title: 'General',
+        icon: FeatherIcons.settings,
+        page: SettingsPageSection(title: "General settings", children: [
+          SettingsPageControl(
+            id: "general.autoupdate",
+            title: "Automatically update modpacks on launch",
+            defaultValue: true,
+          ),
+        ]),
       ),
-    );
+      SettingsPage(
+        title: 'Java',
+        icon: FeatherIcons.coffee,
+        page: SettingsPageSection(title: "Java settings", children: []),
+      ),
+      SettingsPage(
+        title: 'Debug',
+        icon: FeatherIcons.terminal,
+        page: SettingsPageSection(title: "Debug settings", children: [
+          SettingsPageControl(
+            id: "debug.show_debug_logs",
+            title: "Show debug logs",
+            defaultValue: true,
+          ),
+        ]),
+      ),
+      SettingsPage(
+        title: 'About',
+        icon: FeatherIcons.info,
+        page: SettingsPageSection(title: "About NeTask Launcher", children: [
+          SettingsPageControl(
+              id: "",
+              defaultValue: Column(
+                children: [
+                  Image.asset("assets/images/ntlauncher256.png",
+                      width: 256, height: 256),
+                  const Text(
+                    "NeTask Launcher",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const VersionText(),
+                ],
+              )),
+        ]),
+      ),
+    ]);
   }
 }

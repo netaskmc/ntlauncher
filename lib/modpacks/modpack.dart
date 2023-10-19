@@ -56,7 +56,9 @@ class Modpack {
   late String id;
   ModpackInstallStatus status = ModpackInstallStatus.unknown;
 
-  Modpack({required this.meta}) {
+  ModpackManager manager;
+
+  Modpack({required this.meta, required this.manager}) {
     id = meta.id;
   }
 
@@ -69,5 +71,17 @@ class Modpack {
       status = ModpackInstallStatus.notInstalled;
       Log.debug.log("Modpack $id is not installed.");
     }
+  }
+
+  Future<void> install() async {
+    Log.error.log("Installing modpacks is not yet implemented.");
+  }
+
+  Future<void> uninstall() async {
+    Log.error.log("Uninstalling modpacks is not yet implemented.");
+  }
+
+  Future<void> update() async {
+    Log.error.log("Updating modpacks is not yet implemented.");
   }
 }

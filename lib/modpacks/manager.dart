@@ -20,6 +20,8 @@ class ModpackManager with ChangeNotifier {
   List<Modpack> _local = [];
   List<Modpack> get local => _local;
 
+  String? _selectedModpackId;
+
   set local(List<Modpack> value) {
     _local = value;
     notifyListeners();
@@ -32,9 +34,8 @@ class ModpackManager with ChangeNotifier {
 
   ModpackManager() {
     Log.debug.log("ModpackManager base path: $basePath");
-    fetchRemote()
-        .then((_) => Future.wait(_remote.map((e) => e.checkStatus())))
-        .then((_) => notifyListeners());
+
+    fetchRemote().then((_) => checkStatus());
   }
 
   Future<void> fetchRemote() async {
@@ -42,11 +43,74 @@ class ModpackManager with ChangeNotifier {
     try {
       var response = await http.get(Uri.parse("${remoteRoot}index.json"));
       List<dynamic> json = jsonDecode(response.body);
-      remote = json.map((e) => Modpack(meta: ModpackMeta.fromJson(e))).toList();
+      remote = json
+          .map((e) => Modpack(
+                meta: ModpackMeta.fromJson(e),
+                manager: this,
+              ))
+          .toList();
     } catch (e) {
       Log.error.log("Failed to fetch remote modpacks: $e");
     }
     Log.info.log("Fetched ${remote.length} remote modpacks.");
+    notifyListeners();
+  }
+
+  Future<void> checkStatus() async {
+    Log.debug.log("Checking modpack statuses...");
+    await Future.wait(_remote.map((e) => e.checkStatus()));
+    notifyListeners();
+  }
+
+  void selectModpack(String id) {
+    _selectedModpackId = id;
+    notifyListeners();
+  }
+
+  Modpack? get selectedModpack {
+    if (_selectedModpackId == null) return null;
+    return modpackById(_selectedModpackId!);
+  }
+
+  bool isSelected(Modpack mp) {
+    return mp.id == _selectedModpackId;
+  }
+
+  Modpack? modpackById(String id) {
+    try {
+      return [...remote, ...local].firstWhere((e) => e.id == id);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<void> install(String modpackId) async {
+    Modpack? mp = modpackById(modpackId);
+    if (mp == null) {
+      Log.error.log("Failed to install modpack $modpackId: not found.");
+      return;
+    }
+    await mp.install();
+    notifyListeners();
+  }
+
+  Future<void> uninstall(String modpackId) async {
+    Modpack? mp = modpackById(modpackId);
+    if (mp == null) {
+      Log.error.log("Failed to uninstall modpack $modpackId: not found.");
+      return;
+    }
+    await mp.uninstall();
+    notifyListeners();
+  }
+
+  Future<void> update(String modpackId) async {
+    Modpack? mp = modpackById(modpackId);
+    if (mp == null) {
+      Log.error.log("Failed to update modpack $modpackId: not found.");
+      return;
+    }
+    await mp.update();
     notifyListeners();
   }
 }

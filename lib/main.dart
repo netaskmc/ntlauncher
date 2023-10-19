@@ -3,6 +3,8 @@ import 'package:feather_icons/feather_icons.dart';
 import 'package:ntlauncher/auth/descriptor.dart';
 import 'package:ntlauncher/logger.dart';
 import 'package:ntlauncher/modpacks/manager.dart';
+import 'package:ntlauncher/modpacks/modpack.dart';
+import 'package:ntlauncher/providers/settings.dart';
 import 'package:ntlauncher/tabs/log.dart';
 import 'package:ntlauncher/tabs/modpacks.dart';
 import 'package:ntlauncher/ui/accent_button.dart';
@@ -18,12 +20,13 @@ void main() async {
   await windowManager.ensureInitialized();
 
   WindowOptions windowOptions = const WindowOptions(
-      size: Size(800, 600),
-      center: true,
-      // backgroundColor: Colors.transparent,
-      skipTaskbar: false,
-      // titleBarStyle: TitleBarStyle.hidden,
-      minimumSize: Size(400, 500));
+    size: Size(800, 600),
+    center: true,
+    // backgroundColor: Colors.transparent,
+    skipTaskbar: false,
+    // titleBarStyle: TitleBarStyle.hidden,
+    minimumSize: Size(400, 500),
+  );
   windowManager.waitUntilReadyToShow(windowOptions, () async {
     await windowManager.show();
     await windowManager.focus();
@@ -41,6 +44,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (ctx) => ModpackManager()),
         ChangeNotifierProvider(create: (ctx) => LogProvider()),
+        ChangeNotifierProvider(create: (ctx) => SettingsManager()),
       ],
       child: MaterialApp(
         title: 'NeTask Launcher',
@@ -206,17 +210,7 @@ class BottomBar extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              Expanded(
-                  child: AccentButton(
-                color: const Color.fromRGBO(123, 27, 138, 1),
-                child: Text(
-                  "Launch",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                // onPressed: _incrementCounter,
-              )),
+              Expanded(child: LaunchButton()),
               const SizedBox(width: 10),
               AccentButton(
                 width: 70,
@@ -237,5 +231,42 @@ class BottomBar extends StatelessWidget {
             ],
           )),
     );
+  }
+}
+
+class LaunchButton extends StatelessWidget {
+  const LaunchButton({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<ModpackManager>(builder: (context, value, child) {
+      bool actionable = false;
+      String text = "Launch";
+      if (value.selectedModpack?.status == ModpackInstallStatus.installed) {
+        actionable = true;
+      } else if (value.selectedModpack?.status ==
+          ModpackInstallStatus.updateAvailable) {
+        actionable = true;
+        text = "Update";
+      } else if (value.selectedModpack?.status ==
+          ModpackInstallStatus.onlyLocal) {
+        actionable = true;
+      }
+
+      return AccentButton(
+        color: actionable
+            ? Color.fromRGBO(123, 27, 138, 1)
+            : Color.fromRGBO(54, 54, 54, 1),
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        // onPressed: _incrementCounter,
+      );
+    });
   }
 }

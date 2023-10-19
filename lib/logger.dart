@@ -72,7 +72,13 @@ class LogProvider with ChangeNotifier {
   List<LogEntry> get logs => Log._logs;
 
   LogProvider() {
-    Log.subscribe((s, level) => notifyListeners());
+    Log.subscribe((s, level) => deferNotify());
     notifyListeners();
+  }
+
+  void deferNotify() {
+    Future.delayed(const Duration(milliseconds: 50), () async {
+      notifyListeners();
+    });
   }
 }
