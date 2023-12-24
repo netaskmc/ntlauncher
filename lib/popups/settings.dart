@@ -3,6 +3,9 @@ import 'dart:io';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:ntlauncher/default_settings.dart';
+import 'package:ntlauncher/popups/javafinder.dart';
+import 'package:ntlauncher/providers/settings.dart';
+import 'package:ntlauncher/ui/button.dart';
 import 'package:ntlauncher/ui/settings_pages.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -87,6 +90,25 @@ class GeneralSettingsDialog extends StatelessWidget {
             title: "Java path",
             defaultValue: DefaultSettings.javaPath,
           ),
+          SettingsPageControl(
+            id: "",
+            defaultValue: Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: NtButton(
+                text: "Find Java",
+                icon: FeatherIcons.search,
+                onPressed: () {
+                  showDialog<String>(
+                    context: context,
+                    builder: (BuildContext context) => JavaFinder(
+                      onConfirm: (j) =>
+                          Settings.setSetting("java.path", j.path),
+                    ),
+                  );
+                },
+              ),
+            ),
+          )
         ]),
       ),
       SettingsPage(
@@ -108,8 +130,11 @@ class GeneralSettingsDialog extends StatelessWidget {
               id: "",
               defaultValue: Column(
                 children: [
-                  Image.asset("assets/images/ntlauncher256.png",
-                      width: 256, height: 256),
+                  Image.asset(
+                    "assets/images/ntlauncher256.png",
+                    width: 256,
+                    height: 256,
+                  ),
                   const Text(
                     "NeTask Launcher",
                     style: TextStyle(

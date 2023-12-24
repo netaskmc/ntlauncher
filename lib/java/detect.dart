@@ -6,14 +6,21 @@ class JavaDetector {
     "C:\\Program Files\\Java\\*",
     "C:\\Program Files\\AdoptOpenJDK\\*",
     "C:\\Program Files\\Zulu\\*",
-    "C:\\Program Files (x86)\\Java\\*",
+    "C:\\Program Files\\Common Files\\Oracle\\Java\\*",
+    "C:\\ProgramData\\Oracle\\Java\\*",
+  ];
+
+  static final List<String> possibleBinaries = [
+    "bin/java",
+    "javapath/java",
   ];
 
   static Future<List<String>> winFindBinaries() async {
     var paths = await Future.wait(windowsPaths.map((e) => matchPaths(e)));
     return paths
         .expand((e) => e)
-        .map((e) => ppath.join(e, "bin/java.exe"))
+        .map((e) => possibleBinaries.map((b) => ppath.join(e, "$b.exe")))
+        .expand((e) => e)
         .where((e) => File(e).existsSync())
         .toList();
   }

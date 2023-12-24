@@ -29,6 +29,7 @@ class JavaInstance {
     // run java -cp <classpath> JavaCheck
     ProcessResult result =
         await Process.run(path, ["-cp", JavaCheck.classpath!, "JavaCheck"]);
+    print(result.stderr);
     if (result.exitCode != 0) {
       return null;
     }
@@ -37,7 +38,8 @@ class JavaInstance {
     // java.version=17.0.3
     // java.vendor=Oracle Corporation
 
-    List<String> lines = (result.stdout as String).split("\n");
+    List<String> lines =
+        (result.stdout as String).split("\n").map((e) => e.trim()).toList();
     String? arch;
     String? version;
     String? vendor;
