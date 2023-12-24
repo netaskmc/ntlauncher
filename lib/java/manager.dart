@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/services.dart' show ByteData, rootBundle;
 import 'package:ntlauncher/assetpath.dart';
+import 'package:ntlauncher/default_settings.dart';
+import 'package:ntlauncher/java/detect.dart';
 import 'package:ntlauncher/providers/settings.dart';
 import 'package:path/path.dart' as path;
 
@@ -87,6 +89,14 @@ class JavaCheck {
 
 class JavaManager {
   static String get javaPath =>
-      Settings.getSetting("java.path", Platform.environment["JAVA_HOME"] ?? "");
+      Settings.getSetting("java.path", DefaultSettings.javaPath);
   static set javaPath(String value) => Settings.setSetting("java.path", value);
+
+  static Future<List<JavaInstance>> findInstances() async {
+    var binaries = await JavaDetector.findBinaries();
+    var instances =
+        await Future.wait(binaries.map((e) => JavaInstance.fromPath(e)));
+
+    return instances.where((e) => e != null).map((e) => e!).toList();
+  }
 }

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:ntlauncher/default_settings.dart';
 import 'package:ntlauncher/ui/settings_pages.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -19,7 +20,7 @@ class VersionText extends StatelessWidget {
           return Text(
               "Version ${snapshot.data!.version}, build ${snapshot.data!.buildNumber}");
         } else {
-          return Text("Version ...");
+          return const Text("Version ...");
         }
       },
     );
@@ -65,7 +66,7 @@ class GeneralSettingsDialog extends StatelessWidget {
           SettingsPageControl(
             id: "general.jvm_ram",
             title: "Default RAM allocation limits (MB)",
-            defaultValue: DoubleNum(2048, 4096),
+            defaultValue: DefaultSettings.memory,
             min: 1024,
             max: 16384,
             step: 256,
@@ -73,7 +74,7 @@ class GeneralSettingsDialog extends StatelessWidget {
           SettingsPageControl(
             id: "general.notify_dl",
             title: "Send a notification when a download completes",
-            defaultValue: true,
+            defaultValue: DefaultSettings.dlCompleteNotify,
           ),
         ]),
       ),
@@ -84,7 +85,7 @@ class GeneralSettingsDialog extends StatelessWidget {
           SettingsPageControl(
             id: "java.path",
             title: "Java path",
-            defaultValue: "",
+            defaultValue: DefaultSettings.javaPath,
           ),
         ]),
       ),
@@ -95,7 +96,7 @@ class GeneralSettingsDialog extends StatelessWidget {
           SettingsPageControl(
             id: "debug.show_debug_logs",
             title: "Show debug logs",
-            defaultValue: true,
+            defaultValue: DefaultSettings.printDebug,
           ),
         ]),
       ),

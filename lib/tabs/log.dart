@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ntlauncher/default_settings.dart';
 import 'package:ntlauncher/logger.dart';
 import 'package:ntlauncher/providers/settings.dart';
 import 'package:provider/provider.dart';
@@ -19,7 +20,7 @@ class _LogTabState extends State<LogTab> {
           reverse: true,
           children: logValue.logs
               .where((e) => !settingsValue.getSettingQuietly(
-                      "debug.show_debug_logs", false)
+                      "debug.show_debug_logs", DefaultSettings.printDebug)
                   ? e.level != "DEBUG"
                   : true)
               .map(

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:ntlauncher/default_settings.dart';
 import 'package:ntlauncher/logger.dart';
 import 'package:ntlauncher/modpacks/modpack.dart';
 import 'package:http/http.dart' as http;
@@ -103,7 +104,8 @@ class ModpackManager with ChangeNotifier {
         var same = _local.firstWhere((element) => element.id == e.id);
         if (e.meta.packVersion != same.meta.packVersion) {
           same.status = ModpackInstallStatus.updateAvailable;
-          if (Settings.getSetting("general.autoupdate", true)) {
+          if (Settings.getSetting(
+              "general.autoupdate", DefaultSettings.autoUpdate)) {
             same.update();
           }
         } else {

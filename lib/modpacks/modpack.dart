@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ntlauncher/default_settings.dart';
 import 'package:ntlauncher/logger.dart';
 import 'package:ntlauncher/modpacks/compatibility.dart';
 import 'package:ntlauncher/modpacks/installation.dart';
@@ -160,20 +161,14 @@ class Modpack {
   }
 
   (int, int) get memoryLimits {
-    var global = Settings.getSetting(
-      "general.jvm_ram",
-      DoubleNum(2048.0, 4096.0),
-    );
-    var min = global.first;
-    var max = global.second;
-    var pack = Settings.getSettingOrNull(
+    var pack = Settings.getSetting(
       "modpacks.$id.jvm_ram",
-      DoubleNum(2048.0, 4096.0),
+      Settings.getSetting(
+        "general.jvm_ram",
+        DefaultSettings.memory,
+      ),
     );
-    if (pack != null) {
-      min = pack.first;
-      max = pack.second;
-    }
-    return (min.toInt(), max.toInt());
+
+    return (pack.first.toInt(), pack.second.toInt());
   }
 }

@@ -1,5 +1,6 @@
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:ntlauncher/default_settings.dart';
 import 'package:ntlauncher/modpacks/manager.dart';
 import 'package:ntlauncher/modpacks/modpack.dart';
 import 'package:ntlauncher/providers/settings.dart';
@@ -56,7 +57,7 @@ class ModpackSettingsDialog extends StatelessWidget {
                     id: "modpacks.$modpackId.jvm_ram",
                     title: "RAM allocation limits (MB)",
                     defaultValue: Settings.getSetting(
-                        "general.jvm_ram", DoubleNum(2048, 4096)),
+                        "general.jvm_ram", DefaultSettings.memory),
                     min: 1024,
                     max: 16384,
                     step: 256,

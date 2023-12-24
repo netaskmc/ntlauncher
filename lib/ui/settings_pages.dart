@@ -99,9 +99,9 @@ class SettingsPagesDialog extends StatelessWidget {
 }
 
 class DoubleNum {
-  double first;
-  double second;
-  DoubleNum(this.first, this.second);
+  final double first;
+  final double second;
+  const DoubleNum(this.first, this.second);
 
   List<double> serialize() {
     return [first, second];
