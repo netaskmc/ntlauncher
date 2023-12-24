@@ -105,8 +105,9 @@ class _AccentButtonState extends State<AccentButton>
               smoothness: widget.smoothness,
               borderRadius: BorderRadius.circular(20),
               key: clipKey,
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+              // child: BackdropFilter(
+              child: Container(
+                //   filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),,
                 child: SmoothClipRRect(
                   borderRadius: BorderRadius.circular(19),
                   smoothness: widget.smoothness,

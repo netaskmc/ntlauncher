@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class NtTextField extends StatelessWidget {
+class NtTextField extends StatefulWidget {
   final String? value;
   final ValueChanged<String>? onChanged;
   final String? labelText;
@@ -17,9 +17,34 @@ class NtTextField extends StatelessWidget {
   });
 
   @override
+  State<NtTextField> createState() => _NtTextFieldState();
+}
+
+class _NtTextFieldState extends State<NtTextField> {
+  late TextEditingController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = TextEditingController(text: widget.value);
+    controller.addListener(() {
+      if (widget.onChanged != null) {
+        widget.onChanged!(controller.text);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    controller.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return TextField(
-      obscureText: obscureText,
+      obscureText: widget.obscureText,
+      controller: controller,
       decoration: InputDecoration(
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 12,
@@ -29,7 +54,7 @@ class NtTextField extends StatelessWidget {
           borderRadius: BorderRadius.all(Radius.circular(6)),
           gapPadding: 8,
         ),
-        labelText: labelText,
+        labelText: widget.labelText,
         enabledBorder: const OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(6)),
           borderSide: BorderSide(

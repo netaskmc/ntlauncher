@@ -56,7 +56,7 @@ class Log {
   static void _callback(String s, String level) {
     _logs.add(LogEntry(level, s));
     for (var subscriber in _subscribers) {
-      subscriber(level, s);
+      subscriber(s, level);
     }
   }
 
@@ -72,7 +72,9 @@ class LogProvider with ChangeNotifier {
   List<LogEntry> get logs => Log._logs;
 
   LogProvider() {
-    Log.subscribe((s, level) => deferNotify());
+    Log.subscribe((s, level) {
+      deferNotify();
+    });
     notifyListeners();
   }
 

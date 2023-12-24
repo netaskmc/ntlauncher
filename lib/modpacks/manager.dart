@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:ntlauncher/logger.dart';
 import 'package:ntlauncher/modpacks/modpack.dart';
 import 'package:http/http.dart' as http;
+import 'package:ntlauncher/providers/settings.dart';
 import 'package:path/path.dart' as path;
 
 const String remoteRoot =
@@ -19,6 +20,19 @@ class ModpackManager with ChangeNotifier {
 
   List<Modpack> _local = [];
   List<Modpack> get local => _local;
+
+  List<Modpack> get allPacks {
+    // remove duplicates by id, preferring local over remote
+    var packs = [...local, ...remote];
+    var ids = <String>{};
+    var result = <Modpack>[];
+    for (var pack in packs) {
+      if (ids.contains(pack.id)) continue;
+      ids.add(pack.id);
+      result.add(pack);
+    }
+    return result;
+  }
 
   String? _selectedModpackId;
 
@@ -35,7 +49,7 @@ class ModpackManager with ChangeNotifier {
   ModpackManager() {
     Log.debug.log("ModpackManager base path: $basePath");
 
-    fetchRemote().then((_) => checkStatus());
+    loadLocal().then((_) => fetchRemote()).then((_) => checkStatus());
   }
 
   Future<void> fetchRemote() async {
@@ -56,9 +70,50 @@ class ModpackManager with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> loadLocal() async {
+    Log.info.log("Loading local modpacks...");
+    var dir = Directory(basePath);
+    if (!(await dir.exists())) {
+      return;
+    }
+    var contents = await dir.list().toList();
+    for (var item in contents) {
+      if (item is! Directory) continue;
+      var metaFile = File(path.join(item.path, "ntmeta.json"));
+      if (!(await metaFile.exists())) continue;
+      var meta = ModpackMeta.fromJson(jsonDecode(await metaFile.readAsString()),
+          isRemote: false);
+      _local.add(Modpack(meta: meta, manager: this));
+    }
+  }
+
   Future<void> checkStatus() async {
     Log.debug.log("Checking modpack statuses...");
-    await Future.wait(_remote.map((e) => e.checkStatus()));
+    await Future.wait(_local.map((e) async {
+      try {
+        _remote.firstWhere((element) => element.id == e.id);
+        await e.checkStatus();
+      } catch (err) {
+        e.status = ModpackInstallStatus.onlyLocal;
+      }
+    }));
+    await Future.wait(_remote.map((e) async {
+      if (e.status == ModpackInstallStatus.incompatible) return;
+      try {
+        var same = _local.firstWhere((element) => element.id == e.id);
+        if (e.meta.packVersion != same.meta.packVersion) {
+          same.status = ModpackInstallStatus.updateAvailable;
+          if (Settings.getSetting("general.autoupdate", true)) {
+            same.update();
+          }
+        } else {
+          same.status = ModpackInstallStatus.installed;
+        }
+      } catch (err) {
+        Log.debug.log("Caught error while checking status of $e: $err");
+        e.status = ModpackInstallStatus.notInstalled;
+      }
+    }));
     notifyListeners();
   }
 
@@ -78,7 +133,7 @@ class ModpackManager with ChangeNotifier {
 
   Modpack? modpackById(String id) {
     try {
-      return [...remote, ...local].firstWhere((e) => e.id == id);
+      return allPacks.firstWhere((e) => e.id == id);
     } catch (e) {
       return null;
     }
@@ -90,7 +145,13 @@ class ModpackManager with ChangeNotifier {
       Log.error.log("Failed to install modpack $modpackId: not found.");
       return;
     }
-    await mp.install();
+    bool complete = false;
+    mp.install().then((_) => complete = true);
+    while (true) {
+      if (complete) break;
+      await Future.delayed(const Duration(milliseconds: 250));
+      notifyListeners();
+    }
     notifyListeners();
   }
 

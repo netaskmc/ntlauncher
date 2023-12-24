@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:feather_icons/feather_icons.dart';
-import 'package:ntlauncher/auth/descriptor.dart';
+import 'package:ntlauncher/launch/launch.dart';
 import 'package:ntlauncher/logger.dart';
 import 'package:ntlauncher/modpacks/manager.dart';
 import 'package:ntlauncher/modpacks/modpack.dart';
+import 'package:ntlauncher/popups/account.dart';
+import 'package:ntlauncher/providers/auth.dart';
 import 'package:ntlauncher/providers/settings.dart';
 import 'package:ntlauncher/tabs/log.dart';
 import 'package:ntlauncher/tabs/modpacks.dart';
 import 'package:ntlauncher/ui/accent_button.dart';
+import 'package:ntlauncher/ui/auth_display.dart';
 import 'package:ntlauncher/ui/panel.dart';
 import 'package:ntlauncher/ui/tabs.dart';
 import 'package:ntlauncher/popups/settings.dart';
@@ -19,13 +22,15 @@ void main() async {
   // Must add this line.
   await windowManager.ensureInitialized();
 
+  await Settings.loadSettings();
+
   WindowOptions windowOptions = const WindowOptions(
     size: Size(800, 600),
     center: true,
     // backgroundColor: Colors.transparent,
     skipTaskbar: false,
     // titleBarStyle: TitleBarStyle.hidden,
-    minimumSize: Size(400, 500),
+    minimumSize: Size(600, 500),
   );
   windowManager.waitUntilReadyToShow(windowOptions, () async {
     await windowManager.show();
@@ -45,6 +50,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (ctx) => ModpackManager()),
         ChangeNotifierProvider(create: (ctx) => LogProvider()),
         ChangeNotifierProvider(create: (ctx) => SettingsManager()),
+        ChangeNotifierProvider(create: (ctx) => AuthManager()),
       ],
       child: MaterialApp(
         title: 'NeTask Launcher',
@@ -75,7 +81,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
-  final List<String> tabs = ["modpacks", "vanilla", "logs"];
+  final List<String> tabs = ["modpacks", "logs"];
   late TabController _tabController;
 
   @override
@@ -88,12 +94,12 @@ class _MyHomePageState extends State<MyHomePage>
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        // decoration: BoxDecoration(
-        //   image: DecorationImage(
-        //     image: const AssetImage("assets/images/test_bg.jpg"),
-        //     fit: BoxFit.cover,
-        //   ),
-        // ),
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("assets/images/reborn.jpg"),
+            fit: BoxFit.cover,
+          ),
+        ),
         child: Column(
           // mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
@@ -104,7 +110,7 @@ class _MyHomePageState extends State<MyHomePage>
                 padding: const EdgeInsets.symmetric(horizontal: 10.0),
                 child: NtTabs(
                   names: tabs,
-                  displayNames: ["Modpacks", "Vanilla", "Logs"],
+                  displayNames: const ["Modpacks", "Logs"],
                   controller: _tabController,
                 ),
               ),
@@ -122,7 +128,7 @@ class _MyHomePageState extends State<MyHomePage>
                           padding: const EdgeInsets.all(12.0),
                           child: switch (label) {
                             "modpacks" => const ModpacksTab(),
-                            "vanilla" => const Text("Vanilla"),
+                            //"vanilla" => const Text("Vanilla"),
                             "logs" => const LogTab(),
                             _ => const Text("Unknown"),
                           },
@@ -132,7 +138,7 @@ class _MyHomePageState extends State<MyHomePage>
               ),
             ),
             //   child:
-            BottomBar(auth: EXAMPLE_AUTH_DISPLAY),
+            const BottomBar(),
           ],
         ),
       ),
@@ -143,129 +149,153 @@ class _MyHomePageState extends State<MyHomePage>
 class BottomBar extends StatelessWidget {
   const BottomBar({
     super.key,
-    required this.auth,
   });
-
-  final AuthDisplay auth;
 
   @override
   Widget build(BuildContext context) {
-    Widget authPanel = const Text("Not logged in");
-    if (auth.isLoggedIn()) {
-      authPanel = Row(
-          // alignment: WrapAlignment.center,
-          // runAlignment: WrapAlignment.center,
-          children: [
-            Image.network(
-              "https://dump.mlntcandy.com/mlntcandy_head_nt.png",
-              filterQuality: FilterQuality.none,
-              width: 46,
-              height: 46,
+    Log.subscribe((s, level) {
+      if (level != "ERROR") return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Error: $s",
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
             ),
-            const SizedBox(width: 9),
-            Expanded(
-              child: Wrap(
-                direction: Axis.vertical,
-                spacing: 2,
-                children: [
-                  Text(
-                    auth.descriptor!.type == AuthType.netask
-                        ? "NeTask ID"
-                        : "Offline",
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Color.fromRGBO(155, 155, 155, 1),
-                      // fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 105,
-                    child: Text(
-                      auth.descriptor!.nickname,
-                      softWrap: false,
-                      style: const TextStyle(
-                        overflow: TextOverflow.fade,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            )
-          ]);
-    }
+          ),
+          backgroundColor: Colors.red.shade700.withOpacity(0.7),
+          showCloseIcon: true,
+          closeIconColor: Colors.white,
+          duration: const Duration(seconds: 10),
+        ),
+      );
+    });
 
-    return NtPanel(
-      height: 90,
-      width: double.infinity,
-      child: Container(
-          padding: const EdgeInsets.all(10),
-          child: Row(
-            children: [
-              AccentButton(
-                width: 180,
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: authPanel,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(child: LaunchButton()),
-              const SizedBox(width: 10),
-              AccentButton(
-                width: 70,
-                onPressed: () => showDialog<String>(
-                  context: context,
-                  builder: (BuildContext context) =>
-                      const GeneralSettingsDialog(),
-                ),
-                child: const Padding(
-                  padding: EdgeInsets.fromLTRB(0, 0, 0, 2),
-                  child: Icon(
-                    FeatherIcons.settings,
-                    size: 22,
-                    semanticLabel: "Settings",
+    return Consumer<AuthManager>(builder: (context, auth, child) {
+      Widget authPanel = const Text("Not logged in");
+      if (auth.isLoggedIn) {
+        authPanel = AuthDisplay(auth: auth);
+      }
+
+      return NtPanel(
+        height: 90,
+        width: double.infinity,
+        child: Container(
+            padding: const EdgeInsets.all(10),
+            child: Row(
+              children: [
+                AccentButton(
+                  width: 180,
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: authPanel,
+                  ),
+                  onPressed: () => showDialog<String>(
+                    context: context,
+                    builder: (BuildContext context) => const AccountDialog(),
                   ),
                 ),
-              ),
-            ],
-          )),
-    );
+                const SizedBox(width: 10),
+                const Expanded(child: LaunchButton()),
+                const SizedBox(width: 10),
+                AccentButton(
+                  width: 70,
+                  onPressed: () => showDialog<String>(
+                    context: context,
+                    builder: (BuildContext context) =>
+                        const GeneralSettingsDialog(),
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.fromLTRB(0, 0, 0, 2),
+                    child: Icon(
+                      FeatherIcons.settings,
+                      size: 22,
+                      semanticLabel: "Settings",
+                    ),
+                  ),
+                ),
+              ],
+            )),
+      );
+    });
   }
 }
 
-class LaunchButton extends StatelessWidget {
+class LaunchButton extends StatefulWidget {
   const LaunchButton({
     super.key,
   });
+
+  @override
+  State<LaunchButton> createState() {
+    return _LaunchButtonState();
+  }
+}
+
+class _LaunchButtonState extends State<LaunchButton> {
+  bool running = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Launch.addListener(_handleLaunchStateChange);
+  }
+
+  @override
+  void dispose() {
+    Launch.removeListener(_handleLaunchStateChange);
+    super.dispose();
+  }
+
+  void _handleLaunchStateChange(bool running) {
+    setState(() {
+      this.running = running;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<ModpackManager>(builder: (context, value, child) {
       bool actionable = false;
       String text = "Launch";
-      if (value.selectedModpack?.status == ModpackInstallStatus.installed) {
+      if (running) {
         actionable = true;
-      } else if (value.selectedModpack?.status ==
-          ModpackInstallStatus.updateAvailable) {
-        actionable = true;
-        text = "Update";
-      } else if (value.selectedModpack?.status ==
-          ModpackInstallStatus.onlyLocal) {
-        actionable = true;
+        text = "Kill game";
+      } else {
+        if (value.selectedModpack?.status == ModpackInstallStatus.installed) {
+          actionable = true;
+        } else if (value.selectedModpack?.status ==
+            ModpackInstallStatus.updateAvailable) {
+          actionable = true;
+          text = "Update";
+        } else if (value.selectedModpack?.status ==
+            ModpackInstallStatus.onlyLocal) {
+          actionable = true;
+        }
       }
 
       return AccentButton(
         color: actionable
-            ? Color.fromRGBO(123, 27, 138, 1)
-            : Color.fromRGBO(54, 54, 54, 1),
+            ? (running
+                ? Color.fromARGB(255, 255, 86, 199)
+                : const Color.fromRGBO(123, 27, 138, 1))
+            : const Color.fromRGBO(54, 54, 54, 1),
+        onPressed: actionable
+            ? () {
+                if (!running) {
+                  Launch.launch(value.selectedModpack!);
+                } else {
+                  Launch.stop();
+                }
+              }
+            : null,
         child: Text(
           text,
           style: const TextStyle(
             fontWeight: FontWeight.w500,
           ),
         ),
-        // onPressed: _incrementCounter,
       );
     });
   }

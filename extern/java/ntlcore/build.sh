@@ -1,0 +1,1 @@
+mvn package && mv target/ntlcore.jar ../../../assets/artifacts/ntlcore.jar

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:ntlauncher/ui/settings_pages.dart';
@@ -41,12 +43,50 @@ class GeneralSettingsDialog extends StatelessWidget {
             title: "Automatically update modpacks on launch",
             defaultValue: true,
           ),
+          SettingsPageControl(
+            id: "general.close_after_launch",
+            title: "Close launcher after launching the game",
+            defaultValue: true,
+          ),
+          // SettingsPageControl(
+          //   id: "general.jvm_min_ram",
+          //   title: "Default minimum RAM allocation (MB)",
+          //   defaultValue: 2048,
+          //   min: 1024,
+          //   max: 16384,
+          // ),
+          // SettingsPageControl(
+          //   id: "general.jvm_max_ram",
+          //   title: "Default maximum RAM allocation (MB)",
+          //   defaultValue: 4096,
+          //   min: 1024,
+          //   max: 16384,
+          // ),
+          SettingsPageControl(
+            id: "general.jvm_ram",
+            title: "Default RAM allocation limits (MB)",
+            defaultValue: DoubleNum(2048, 4096),
+            min: 1024,
+            max: 16384,
+            step: 256,
+          ),
+          SettingsPageControl(
+            id: "general.notify_dl",
+            title: "Send a notification when a download completes",
+            defaultValue: true,
+          ),
         ]),
       ),
       SettingsPage(
         title: 'Java',
         icon: FeatherIcons.coffee,
-        page: SettingsPageSection(title: "Java settings", children: []),
+        page: SettingsPageSection(title: "Java settings", children: [
+          SettingsPageControl(
+            id: "java.path",
+            title: "Java path",
+            defaultValue: "",
+          ),
+        ]),
       ),
       SettingsPage(
         title: 'Debug',

@@ -16,31 +16,35 @@ class _LogTabState extends State<LogTab> {
     return Consumer<LogProvider>(
       builder: (logContext, logValue, logChild) => Consumer<SettingsManager>(
         builder: (settingsContext, settingsValue, settingsChild) => ListView(
+          reverse: true,
           children: logValue.logs
               .where((e) => !settingsValue.getSettingQuietly(
                       "debug.show_debug_logs", false)
                   ? e.level != "DEBUG"
                   : true)
               .map(
-            (e) {
-              var color = Colors.white;
-              if (e.level == "ERROR") {
-                color = const Color.fromARGB(255, 255, 109, 98);
-              } else if (e.level == "WARN") {
-                color = Colors.yellow;
-              } else if (e.level == "DEBUG") {
-                color = const Color.fromARGB(255, 94, 94, 94);
-              }
-              return Text(
-                e.toString(),
-                style: TextStyle(
-                  color: color,
-                  fontFamily: "JetBrainsMono",
-                  fontSize: 12,
-                ),
-              );
-            },
-          ).toList(),
+                (e) {
+                  var color = Colors.white;
+                  if (e.level == "ERROR") {
+                    color = const Color.fromARGB(255, 255, 109, 98);
+                  } else if (e.level == "WARN") {
+                    color = Colors.yellow;
+                  } else if (e.level == "DEBUG") {
+                    color = const Color.fromARGB(255, 94, 94, 94);
+                  }
+                  return Text(
+                    e.toString(),
+                    style: TextStyle(
+                      color: color,
+                      fontFamily: "JetBrainsMono",
+                      fontSize: 12,
+                    ),
+                  );
+                },
+              )
+              .toList()
+              .reversed
+              .toList(),
         ),
       ),
     );
