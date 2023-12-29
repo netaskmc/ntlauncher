@@ -29,7 +29,6 @@ class JavaInstance {
     // run java -cp <classpath> JavaCheck
     ProcessResult result =
         await Process.run(path, ["-cp", JavaCheck.classpath!, "JavaCheck"]);
-    print(result.stderr);
     if (result.exitCode != 0) {
       return null;
     }

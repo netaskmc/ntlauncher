@@ -13,7 +13,7 @@ class JavaFinder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return NtDialog(
-      title: const Text("Find Java"),
+      title: const Text("Pick Java"),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -24,6 +24,10 @@ class JavaFinder extends StatelessWidget {
                 return Column(
                   children: snapshot.data!.map((e) {
                     return ListTile(
+                      splashColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                       title: Row(
                         children: [
                           Text(e.version,

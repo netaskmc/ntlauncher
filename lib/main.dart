@@ -257,39 +257,37 @@ class _LaunchButtonState extends State<LaunchButton> {
   @override
   Widget build(BuildContext context) {
     return Consumer<ModpackManager>(builder: (context, value, child) {
-      bool actionable = false;
+      Function()? action;
       String text = "Launch";
       if (running) {
-        actionable = true;
+        action = () {
+          if (running) Launch.stop();
+        };
         text = "Kill game";
       } else {
-        if (value.selectedModpack?.status == ModpackInstallStatus.installed) {
-          actionable = true;
+        if (value.selectedModpack?.status == ModpackInstallStatus.installed ||
+            value.selectedModpack?.status == ModpackInstallStatus.onlyLocal) {
+          action = () {
+            if (!running) Launch.launch(value.selectedModpack!);
+          };
         } else if (value.selectedModpack?.status ==
             ModpackInstallStatus.updateAvailable) {
-          actionable = true;
+          action = () {
+            value.selectedModpack!.update();
+          };
           text = "Update";
-        } else if (value.selectedModpack?.status ==
-            ModpackInstallStatus.onlyLocal) {
-          actionable = true;
         }
       }
 
       return AccentButton(
-        color: actionable
+        color: action != null
             ? (running
-                ? Color.fromARGB(255, 255, 86, 199)
+                ? const Color.fromARGB(255, 255, 86, 199)
                 : const Color.fromRGBO(123, 27, 138, 1))
             : const Color.fromRGBO(54, 54, 54, 1),
-        onPressed: actionable
-            ? () {
-                if (!running) {
-                  Launch.launch(value.selectedModpack!);
-                } else {
-                  Launch.stop();
-                }
-              }
-            : null,
+        onPressed: () {
+          if (action != null) action();
+        },
         child: Text(
           text,
           style: const TextStyle(

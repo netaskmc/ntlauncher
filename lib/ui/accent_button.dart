@@ -130,7 +130,7 @@ class _AccentButtonState extends State<AccentButton>
                                 ],
                                 stops: <double>[
                                   0.0,
-                                  pow(dist / 1000, 2).toDouble(),
+                                  pow(min(dist / 1000, 0.8), 2).toDouble(),
                                   1.0
                                 ],
                                 transform: GradientRotation(dir * 4.2),
