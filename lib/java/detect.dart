@@ -1,8 +1,9 @@
 import 'dart:io';
+import 'package:ntlauncher/logger.dart';
 import 'package:path/path.dart' as ppath;
 
 class JavaDetector {
-  static final List<String> windowsPaths = [
+  static final List<String> winPaths = [
     "C:\\Program Files\\Java\\*",
     "C:\\Program Files\\AdoptOpenJDK\\*",
     "C:\\Program Files\\Zulu\\*",
@@ -10,16 +11,38 @@ class JavaDetector {
     "C:\\ProgramData\\Oracle\\Java\\*",
   ];
 
-  static final List<String> possibleBinaries = [
+  static final List<String> macPaths = [
+    "/Library/Java/JavaVirtualMachines/*",
+    "/System/Library/Java/JavaVirtualMachines/*",
+    "/opt/homebrew/opt/openjdk",
+    "/usr/local/opt/openjdk",
+  ];
+
+  static final List<String> winPossibleBinaries = [
     "bin/java",
     "javapath/java",
   ];
 
+  static final List<String> macPossibleBinaries = [
+    "Contents/Home/bin/java",
+    "bin/java",
+  ];
+
   static Future<List<String>> winFindBinaries() async {
-    var paths = await Future.wait(windowsPaths.map((e) => matchPaths(e)));
+    var paths = await Future.wait(winPaths.map((e) => matchPaths(e)));
     return paths
         .expand((e) => e)
-        .map((e) => possibleBinaries.map((b) => ppath.join(e, "$b.exe")))
+        .map((e) => winPossibleBinaries.map((b) => ppath.join(e, "$b.exe")))
+        .expand((e) => e)
+        .where((e) => File(e).existsSync())
+        .toList();
+  }
+
+  static Future<List<String>> macFindBinaries() async {
+    var paths = await Future.wait(macPaths.map((e) => matchPaths(e)));
+    return paths
+        .expand((e) => e)
+        .map((e) => macPossibleBinaries.map((b) => ppath.join(e, b)))
         .expand((e) => e)
         .where((e) => File(e).existsSync())
         .toList();
@@ -55,6 +78,11 @@ class JavaDetector {
   static Future<List<String>> findBinaries() async {
     if (Platform.isWindows) {
       return await winFindBinaries();
+    } else if (Platform.isMacOS) {
+      // return await macFindBinaries();
+      Log.error.log(
+          "MacOS is not supported yet; you can find java binaries manually");
+      return [];
     } else {
       return [];
     }
