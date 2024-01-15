@@ -273,7 +273,7 @@ class _LaunchButtonState extends State<LaunchButton> {
         } else if (value.selectedModpack?.status ==
             ModpackInstallStatus.updateAvailable) {
           action = () {
-            value.selectedModpack!.update();
+            value.update(value.selectedModpack!.id);
           };
           text = "Update";
         }

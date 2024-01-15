@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:ntlauncher/modpacks/manager.dart';
 import 'package:ntlauncher/modpacks/modpack.dart';
 import 'package:ntlauncher/popups/modpacksettings.dart';
+import 'package:ntlauncher/staticcfg.dart';
 import 'package:ntlauncher/ui/button.dart';
 import 'package:provider/provider.dart';
 import 'package:path/path.dart' as path;

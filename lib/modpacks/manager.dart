@@ -7,10 +7,8 @@ import 'package:ntlauncher/logger.dart';
 import 'package:ntlauncher/modpacks/modpack.dart';
 import 'package:http/http.dart' as http;
 import 'package:ntlauncher/providers/settings.dart';
+import 'package:ntlauncher/staticcfg.dart';
 import 'package:path/path.dart' as path;
-
-const String remoteRoot =
-    "https://raw.githubusercontent.com/netaskmc/modpacks/main/";
 
 class ModpackManager with ChangeNotifier {
   static String basePath =
@@ -173,7 +171,13 @@ class ModpackManager with ChangeNotifier {
       Log.error.log("Failed to update modpack $modpackId: not found.");
       return;
     }
-    await mp.update();
+    bool complete = false;
+    mp.update().then((_) => complete = true);
+    while (true) {
+      if (complete) break;
+      await Future.delayed(const Duration(milliseconds: 250));
+      notifyListeners();
+    }
     notifyListeners();
   }
 }

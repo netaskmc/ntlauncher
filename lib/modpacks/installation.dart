@@ -8,6 +8,7 @@ import 'package:ntlauncher/java/manager.dart';
 import 'package:ntlauncher/logger.dart';
 import 'package:ntlauncher/modpacks/manager.dart';
 import 'package:ntlauncher/modpacks/modpack.dart';
+import 'package:ntlauncher/staticcfg.dart';
 import 'package:path/path.dart' as path;
 // import 'package:http/http.dart' as http;
 import 'dart:io';
