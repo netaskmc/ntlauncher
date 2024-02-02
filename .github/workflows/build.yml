@@ -57,7 +57,7 @@ jobs:
           cache: maven
 
       - name: Chmod all shell scripts
-        run: chmod +x **/*.sh
+        run: find extern/ -type f -iname "*.sh" -exec chmod +x {} \;
 
       - name: Build Java externs
         run: cd extern/java && ./build.sh
