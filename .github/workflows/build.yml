@@ -116,7 +116,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.os == 'windows-latest' && 'windows' || matrix.os == 'macos-latest' && 'macos' || 'linux' }}-build
-          path: build/*/ntlauncher-*.@(exe|dmg|zip|tar.gz|deb|AppImage)
+          path: build/*/ntlauncher-*-*.*
           if-no-files-found: error
 
   release:
