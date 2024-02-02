@@ -132,7 +132,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: windows-build
-          path: artifacts/windows
+          path: artifacts
 
       - name: Create release
         id: create_release
