@@ -6,6 +6,41 @@ on:
       - v*
 
 jobs:
+  meta:
+    name: Gather Flutter app meta
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.outputs.result }}
+      # bumped-version: ${{ steps.bumped-version.outputs.result }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get current version
+        id: get-version
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq .version pubspec.yaml
+        # example output: 1.0.0+1
+
+      - name: Bump build number
+        id: bumped-version
+        run: echo "::set-output name=result::$(echo ${{ steps.get-version.outputs.result }} | awk -F+ '{print $1 "+" $2+1}')"
+
+      - name: Set bumped build number
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq -i '.version = "${{ steps.bumped-version.outputs.result }}"' pubspec.yaml
+
+      - name: Commit and push version bump
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Bump build number to ${{ steps.bumped-version.outputs.result }}"
+          commit_options: "--no-verify"
+          file_pattern: "pubspec.yaml"
+          branch: ${{ github.ref }}
+          commit_user_name: "GitHub Actions"
+          commit_user_email: "actions@github.com"
+
   build-java:
     name: Build & upload Java artifacts
     runs-on: ubuntu-latest
@@ -33,13 +68,18 @@ jobs:
         with:
           name: java-extern-artifacts
           path: artifacts.zip
+          if-no-files-found: error
+          retention-days: 1
 
   build-app:
     name: Build Flutter app
-    needs: build-java
+    needs:
+      - build-java
+      - meta
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        # os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [windows-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -65,3 +105,60 @@ jobs:
 
       - name: Build app
         run: flutter build ${{ matrix.os == 'windows-latest' && 'windows' || matrix.os == 'macos-latest' && 'macos' || 'linux' }} --release
+
+      - name: Create Windows installer
+        uses: joncloud/makensis-action@v4
+        if: ${{ matrix.os == 'windows-latest' }}
+        with:
+          script-file: installer/win/installer.nsi
+
+      - name: Create Windows zip
+        if: ${{ matrix.os == 'windows-latest' }}
+        # zip all files in build/windows/runner/Release to build/windows/ntlauncher-windows.zip
+        run: 7z a -tzip build/windows/ntlauncher-${{ needs.meta.outputs.version }}-portable.zip build/windows/runner/Release/*
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.os == 'windows-latest' && 'windows' || matrix.os == 'macos-latest' && 'macos' || 'linux' }}-build
+          path: build/*/ntlauncher-*.[exe|dmg|zip|tar.gz|deb|AppImage]
+          if-no-files-found: error
+
+  # release:
+  #   name: Release
+  #   needs:
+  #     - build-app
+  #     - meta
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+
+  #     - name: Download Windows build artifacts
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: windows-build
+  #         path: artifacts/windows
+
+  #     - name: Create release
+  #       id: create_release
+  #       uses: comnoco/create-release-action@v2
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       with:
+  #         tag_name: ${{ needs.meta.outputs.version }}
+  #         release_name: Release ${{ needs.meta.outputs.version }}
+  #         body: |
+  #           Release ${{ needs.meta.outputs.version }}
+  #         draft: true
+  #         prerelease: false
+
+  #     - name: Upload release assets
+  #       id: upload-release-asset
+  #       uses:
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       with:
+  #         upload_url: ${{ steps.create_release.outputs.upload_url }}
+  #         asset_path: build/*/ntlauncher-*.[exe|dmg|zip|tar.gz|deb|AppImage]
+  #         asset_name: ntlauncher-${{ needs.meta.outputs.version }}-
+  #         asset_content_type: application/octet-stream
