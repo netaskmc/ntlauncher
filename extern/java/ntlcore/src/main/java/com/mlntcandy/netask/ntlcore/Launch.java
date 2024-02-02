@@ -71,8 +71,25 @@ public class Launch {
 
         try {
             Process game = launcher.launch(option, new MinecraftListener());
+            // on ^D, send SIGINT to game
+            Thread exiter = new Thread(() -> {
+                Scanner scanner = new Scanner(System.in);
+
+                while (scanner.hasNextLine()) {
+                    String l = scanner.nextLine();
+                    if (l.equals("\u0004")) {
+                        game.destroy();
+                        break;
+                    }
+                }
+            });
+            exiter.start();
             // wait for game to exit
             game.waitFor();
+            exiter.interrupt();
+            // exit
+            System.out.println("LOG: Game exited.");
+            System.exit(0);
         } catch (LaunchException e) {
             System.out.print("ERROR: Failed to launch. ");
             e.printStackTrace();

@@ -29,6 +29,8 @@ void main() async {
     center: true,
     // backgroundColor: Colors.transparent,
     skipTaskbar: false,
+    titleBarStyle: TitleBarStyle.normal,
+    // windowButtonVisibility: true,
     // titleBarStyle: TitleBarStyle.hidden,
     minimumSize: Size(600, 500),
   );

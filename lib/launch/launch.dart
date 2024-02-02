@@ -33,8 +33,8 @@ class Launch {
 
   static Future<void> stop() async {
     if (_process == null) return;
-    _process!.kill();
-    _process = null;
+    _process!.stdin.writeln("\u0004");
+    await _process!.exitCode;
   }
 
   static Future<void> launch(Modpack modpack) async {

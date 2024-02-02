@@ -47,25 +47,12 @@ class GeneralSettingsDialog extends StatelessWidget {
             title: "Automatically update modpacks on launch",
             defaultValue: true,
           ),
-          SettingsPageControl(
-            id: "general.close_after_launch",
-            title: "Close launcher after launching the game",
-            defaultValue: true,
-          ),
           // SettingsPageControl(
-          //   id: "general.jvm_min_ram",
-          //   title: "Default minimum RAM allocation (MB)",
-          //   defaultValue: 2048,
-          //   min: 1024,
-          //   max: 16384,
+          //   id: "general.close_after_launch",
+          //   title: "Close launcher after launching the game",
+          //   defaultValue: true,
           // ),
-          // SettingsPageControl(
-          //   id: "general.jvm_max_ram",
-          //   title: "Default maximum RAM allocation (MB)",
-          //   defaultValue: 4096,
-          //   min: 1024,
-          //   max: 16384,
-          // ),
+
           SettingsPageControl(
             id: "general.jvm_ram",
             title: "Default RAM allocation limits (MB)",
@@ -74,11 +61,11 @@ class GeneralSettingsDialog extends StatelessWidget {
             max: 16384,
             step: 256,
           ),
-          SettingsPageControl(
-            id: "general.notify_dl",
-            title: "Send a notification when a download completes",
-            defaultValue: DefaultSettings.dlCompleteNotify,
-          ),
+          // SettingsPageControl(
+          //   id: "general.notify_dl",
+          //   title: "Send a notification when a download completes",
+          //   defaultValue: DefaultSettings.dlCompleteNotify,
+          // ),
         ]),
       ),
       SettingsPage(
